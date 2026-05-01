@@ -5,8 +5,22 @@
 .env.*
 .phpunit.result.cache
 /storage/*.key
+
+# Biarkan folder storage tetap ada tapi isinya kosong
 /storage/logs/*
-/storage/framework/*
-/bootstrap/cache/*
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/app/public/*
+
+# Jangan biarkan file sampah masuk
 .idea
 .vscode
+.DS_Store
+Thumbs.db
+
+# File backup/dump database (Penting buat lu hapus/abaikan)
+*.sql
+/migration_backup/
+/siswa
+/Daffa Siswa,
