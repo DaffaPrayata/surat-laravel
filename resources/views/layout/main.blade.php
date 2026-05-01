@@ -1,23 +1,10 @@
 <!DOCTYPE html>
-
-<!-- =========================================================
-* Sneat - Bootstrap 5 HTML Admin Template - Pro | v1.0.0
-==============================================================
-
-* Product Page: https://themeselection.com/products/sneat-bootstrap-html-admin-template/
-* Created by: ThemeSelection
-* License: You must have a valid license purchased in order to legally use the theme for your project.
-* Copyright ThemeSelection (https://themeselection.com)
-
-=========================================================
- -->
-<!-- beautify ignore:start -->
 <html
     lang="id"
     class="light-style layout-menu-fixed"
     dir="ltr"
     data-theme="theme-default"
-    data-assets-path="{{ asset('public/sneat/') }}"
+    data-assets-path="{{ asset('sneat/') }}/"
     data-template="vertical-menu-template-free"
 >
 <head>
@@ -29,143 +16,129 @@
 
     <title>{{ config('app.name') }}</title>
 
-    <meta name="description" content=""/>
-
-    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('logo-black.png') }}"/>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link
-        href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet"
     />
 
-    <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="{{asset('sneat/vendor/fonts/boxicons.css')}}"/>
-
-    <!-- Core CSS -->
     <link rel="stylesheet" class="template-customizer-core-css" href="{{asset('sneat/vendor/css/core.css')}}"/>
-    <link rel="stylesheet" class="template-customizer-theme-css"
-          href="{{asset('sneat/vendor/css/theme-default.css')}}"/>
+    <link rel="stylesheet" class="template-customizer-theme-css" href="{{asset('sneat/vendor/css/theme-default.css')}}"/>
     <link rel="stylesheet" href="{{asset('sneat/css/demo.css')}}"/>
-
-    <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{asset('sneat/vendor/libs/perfect-scrollbar/perfect-scrollbar.css')}}"/>
     <link rel="stylesheet" href="{{asset('sneat/vendor/libs/sweetalert2/sweetalert2.min.css')}}"/>
 
-    <!-- Page CSS -->
     @stack('style')
 
-    <!-- Helpers -->
-    <script src="{{ asset('sneat/vendor/js/helpers.js') }}"></script>
+    <style>
+        /* ── MOD MODERN INDUSTRIAL: MEMPERPANJANG AREA DASHBOARD ── */
 
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+        /* 1. Reset Navbar agar tidak memotong Dashboard */
+        .layout-navbar {
+            position: relative !important; /* Bikin navbar gak melayang nutupin konten */
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0.5rem 1.5rem !important;
+            box-shadow: none !important;
+            background: transparent !important; /* Biar nyatu sama dashboard */
+        }
+
+        /* 2. Memperpanjang Dashboard ke Atas */
+        .layout-page {
+            padding-top: 0 !important; /* Hapus padding yang bikin sempit */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-wrapper {
+            margin-top: -20px; /* Tarik dashboard sedikit ke atas biar lebih luas */
+        }
+
+        .container-p-y {
+            padding-top: 0.5rem !important; /* Pepetin konten ke arah navbar */
+        }
+
+        /* 3. Perbaikan Mobile Overlay */
+        @media (max-width: 1199.98px) {
+            .layout-menu {
+                position: fixed !important;
+                z-index: 1500 !important;
+                transform: translate3d(-100%, 0, 0);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .layout-menu-expanded .layout-menu {
+                transform: translate3d(0, 0, 0) !important;
+            }
+
+            .layout-overlay {
+                z-index: 1400 !important;
+            }
+
+            /* Di mobile navbar tetep dibikin clean */
+            .layout-navbar {
+                background: #111 !important; /* Kasih warna solid dikit di mobile */
+                margin-bottom: 10px !important;
+            }
+        }
+
+        /* Style tambahan biar toggle gak ketutup */
+        .nav-item {
+            z-index: 1200 !important;
+        }
+    </style>
+
+    <script src="{{ asset('sneat/vendor/js/helpers.js') }}"></script>
     <script src="{{ asset('sneat/js/config.js') }}"></script>
 </head>
 
 <body>
-<!-- Layout wrapper -->
-<div class="layout-wrapper layout-content-navbar">
-    <div class="layout-container">
-        <!-- Menu -->
-        @include('components.sidebar')
-        <!-- / Menu -->
+    <div class="layout-wrapper layout-content-navbar">
+        <div class="layout-container">
+            
+            @include('components.sidebar')
 
-        <!-- Layout container -->
-        <div class="layout-page">
-            <!-- Navbar -->
-            @include('components.navbar')
-            <!-- / Navbar -->
+            <div class="layout-page">
+                
+                @include('components.navbar')
 
-            <!-- Content wrapper -->
-            <div class="content-wrapper">
-                <!-- Content -->
-                <div class="container-xxl flex-grow-1 container-p-y">
-                    @yield('content')
+                <div class="content-wrapper">
+                    <div class="container-xxl flex-grow-1 container-p-y">
+                        @yield('content')
+                    </div>
+
+                    @include('components.footer')
                 </div>
-                <!-- / Content -->
-
-                <!-- Footer -->
-                @include('components.footer')
-                <!-- / Footer -->
-
-                <div class="content-backdrop fade"></div>
             </div>
-            <!-- Content wrapper -->
         </div>
-        <!-- / Layout page -->
+
+        <div class="layout-overlay layout-menu-toggle"></div>
     </div>
 
-    <!-- Overlay -->
-    <div class="layout-overlay layout-menu-toggle"></div>
-</div>
-<!-- / Layout wrapper -->
+    <script src="{{ asset('sneat/vendor/libs/jquery/jquery.js')}}"></script>
+    <script src="{{ asset('sneat/vendor/libs/popper/popper.js')}}"></script>
+    <script src="{{ asset('sneat/vendor/js/bootstrap.js')}}"></script>
+    <script src="{{ asset('sneat/vendor/libs/perfect-scrollbar/perfect-scrollbar.js')}}"></script>
+    <script src="{{ asset('sneat/vendor/js/menu.js')}}"></script>
+    <script src="{{ asset('sneat/vendor/libs/sweetalert2/sweetalert2.all.min.js')}}"></script>
+    <script src="{{ asset('sneat/js/main.js')}}"></script>
 
-<!-- Core JS -->
-<!-- build:js assets/vendor/js/core.js -->
-<script src="{{ asset('sneat/vendor/libs/jquery/jquery.js')}}"></script>
-<script src="{{ asset('sneat/vendor/libs/popper/popper.js')}}"></script>
-<script src="{{ asset('sneat/vendor/js/bootstrap.js')}}"></script>
-<script src="{{ asset('sneat/vendor/libs/perfect-scrollbar/perfect-scrollbar.js')}}"></script>
-
-<script src="{{ asset('sneat/vendor/js/menu.js')}}"></script>
-<!-- endbuild -->
-
-<!-- Vendors JS -->
-<script src="{{ asset('sneat/vendor/libs/masonry/masonry.js')}}"></script>
-<script src="{{ asset('sneat/vendor/libs/sweetalert2/sweetalert2.all.min.js')}}"></script>
-
-<!-- Main JS -->
-<script src="{{ asset('sneat/js/main.js')}}"></script>
-<script>
-    $(document).on('click', '.btn-delete', function (req) {
-        Swal.fire({
-            title: '{{ __('menu.general.delete_confirm') }}',
-            text: "{{ __('menu.general.delete_warning') }}",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#696cff',
-            confirmButtonText: '{{ __('menu.general.delete') }}',
-            cancelButtonText: '{{ __('menu.general.cancel') }}'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $(this).parent('form').submit();
-            }
-        })
-    });
-</script>
-
-<!-- Page JS -->
-@stack('script')
-
-@if(session('success'))
     <script>
-        Toast.fire({
-            icon: 'success',
-            title: '{{ session('success') }}'
-        })
+        $(document).ready(function () {
+            $('.layout-menu-toggle').on('click', function (e) {
+                e.preventDefault();
+                $('html').toggleClass('layout-menu-expanded');
+            });
+            $('.layout-overlay').on('click', function () {
+                $('html').removeClass('layout-menu-expanded');
+            });
+        });
     </script>
-@elseif(session('error'))
-    <script>
-        Toast.fire({
-            icon: 'error',
-            title: '{{ session('error') }}'
-        })
-    </script>
-@elseif(session('info'))
-    <script>
-        Toast.fire({
-            icon: 'info',
-            title: '{{ session('info') }}'
-        })
-    </script>
-@endif
 
-<!-- Place this tag in your head or just before your close body tag. -->
-<script async defer src="https://buttons.github.io/buttons.js"></script>
+    @stack('script')
 </body>
 </html>
-

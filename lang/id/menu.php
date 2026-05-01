@@ -4,7 +4,7 @@ return [
     'home' => 'Beranda',
     'users' => 'Kelola Pengguna',
     'transaction' => [
-        'menu' => 'Transaksi Surat',
+        'menu' => 'Jumlah Surat',
         'incoming_letter' => 'Surat Masuk',
         'outgoing_letter' => 'Surat Keluar',
         'disposition_letter' => 'Surat Disposisi',

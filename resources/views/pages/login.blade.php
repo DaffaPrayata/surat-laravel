@@ -378,7 +378,7 @@
             <img src="{{ asset('logo-black.png') }}" alt="Logo SMKN 2 Padang" class="school-logo">
             
             <div class="welcome-text">
-                <h1 class="welcome-title">Selamat Datang</h1>
+                <h1 class="welcome-title"> Datang</h1>
                 <p class="welcome-subtitle">di Sistem Informasi</p>
                 <h2 class="school-name">SMKN 2 Padang</h2>
             </div>

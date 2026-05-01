@@ -2,21 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Config as ConfigEnum;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Models\Config;
 use App\Models\User;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Contracts\View\View;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): View
     {
         return view('pages.user', [
@@ -25,63 +21,64 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreUserRequest $request): RedirectResponse
-{
-    try {
-        $newUser = $request->validated();
-
-        $newUser['password'] = Hash::make('password123'); // default
-        $newUser['role'] = 'STAFF';
-        $newUser['is_active'] = true;
-
-        User::create($newUser);
-
-        return back()->with('success', 'User berhasil ditambahkan');
-    } catch (\Throwable $e) {
-        return back()->with('error', $e->getMessage());
-    }
-}
-
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
         try {
-            $newUser = $request->validated();
+            $data = $request->validated();
+            $plainPassword = Str::random(8);
 
-            // checkbox is_active
-            $newUser['is_active'] = isset($newUser['is_active']);
+            $data['password'] = Hash::make($plainPassword);
+            $data['is_active'] = true;
+            $data['role'] = $request->role ?? 'staff';
 
-            // reset password jika dicentang
-            if ($request->filled('reset_password')) {
-                $newUser['password'] = Hash::make(
-                    Config::getValueByCode(ConfigEnum::DEFAULT_PASSWORD)
-                );
-            }
+            User::create($data);
 
-            $user->update($newUser);
-
-            return back()->with('success', __('menu.general.success'));
-        } catch (\Throwable $exception) {
-            return back()->with('error', $exception->getMessage());
+            return back()->with('success_user', [
+                'message' => 'User berhasil ditambahkan!',
+                'password' => $plainPassword
+            ]);
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
+    {
+        try {
+            $data = $request->validated();
+            $data['is_active'] = $request->has('is_active');
+            $data['role'] = $request->role;
+            $newPlain = null;
+
+            if ($request->has('reset_password')) {
+                $newPlain = Str::random(8); // Pake random biar aman tiap user
+                $data['password'] = Hash::make($newPlain);
+            }
+
+            // SIMPAN DULU KE DATABASE
+            $user->update($data);
+
+            // BARU RETURN NOTIF PASSWORD (KALAU ADA)
+            if ($newPlain) {
+                return back()->with('success_user', [
+                    'message' => 'Password berhasil di-reset!',
+                    'password' => $newPlain
+                ]);
+            }
+
+            return back()->with('success', 'Data user berhasil diperbarui');
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
     public function destroy(User $user): RedirectResponse
     {
         try {
             $user->delete();
-            return back()->with('success', __('menu.general.success'));
-        } catch (\Throwable $exception) {
-            return back()->with('error', $exception->getMessage());
+            return back()->with('success', 'User berhasil dihapus');
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
         }
     }
 }

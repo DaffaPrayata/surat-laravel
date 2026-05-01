@@ -33,7 +33,7 @@ class StoreLetterRequest extends FormRequest
         ];
     }
 
-    /**
+   /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, mixed>
@@ -45,7 +45,10 @@ class StoreLetterRequest extends FormRequest
             'from' => [Rule::requiredIf($this->type == LetterType::INCOMING->type())],
             'to' => [Rule::requiredIf($this->type == LetterType::OUTGOING->type())],
             'type' => ['required'],
-            'reference_number' => ['required', Rule::unique('letters')],
+            
+            // HAPUS Rule::unique('letters') BIAR JAM PELAJARAN BISA SAMA
+            'reference_number' => ['required'], 
+            
             'received_date' => [Rule::requiredIf($this->type == LetterType::INCOMING->type())],
             'letter_date' => ['required'],
             'description' => ['required'],

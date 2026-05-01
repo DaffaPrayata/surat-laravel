@@ -1,537 +1,923 @@
 @extends('layout.main')
 
 @push('style')
-    <link rel="stylesheet" href="{{asset('sneat/vendor/libs/apex-charts/apex-charts.css')}}" />
+    <link rel="stylesheet" href="{{ asset('sneat/vendor/libs/apex-charts/apex-charts.css') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <style>
+        /* ══════════════════════════════════════
+           TOKEN SYSTEM — light & dark
+        ══════════════════════════════════════ */
         :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --bg-card: #ffffff;
-            --text-primary: #2d3748;
-            --text-secondary: #718096;
-            --border-color: #e2e8f0;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --bg-page:        #f0f4fa;
+            --bg-surface:     #ffffff;
+            --bg-navy:        #0c1220;
+            --bg-navy-sub:    #111827;
+            --border:         rgba(0,0,0,.07);
+            --border-navy:    #1e2d45;
+            --text-primary:   #0c1220;
+            --text-secondary: #64748b;
+            --text-hint:      #94a3b8;
+            --text-navy:      #e8f0fe;
+            --text-navy-dim:  #5a7a9a;
+            --text-accent:    #7eb8f7;
+            --emerald:        #1D9E75;
+            --emerald-dim:    #E1F5EE;
+            --radius:         14px;
+            --radius-sm:      8px;
+            --shadow:         0 1px 3px rgba(0,0,0,.06);
         }
 
         [data-theme="dark"] {
-            --bg-primary: #1a202c;
-            --bg-secondary: #2d3748;
-            --bg-card: #2d3748;
-            --text-primary: #f7fafc;
-            --text-secondary: #cbd5e0;
-            --border-color: #4a5568;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --bg-page:        #0d1117;
+            --bg-surface:     #161c28;
+            --bg-navy:        #0d1117;
+            --bg-navy-sub:    #161c28;
+            --border:         rgba(255,255,255,.07);
+            --text-primary:   #e8f0fe;
+            --text-secondary: #8b9ab8;
+            --text-hint:      #4a6080;
+            --shadow:         0 1px 3px rgba(0,0,0,.3);
         }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--bg-secondary);
-            transition: background-color 0.3s ease;
+            font-family: 'DM Sans', system-ui, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
         }
 
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: var(--bg-card);
-            border: 2px solid var(--border-color);
-            border-radius: 50px;
-            padding: 8px 16px;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
+        /* ══════════════════════════════════════
+           TOP BAR
+        ══════════════════════════════════════ */
+        .db-topbar {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 12px;
         }
 
-        .theme-toggle:hover {
-            box-shadow: var(--shadow-hover);
-            transform: translateY(-2px);
-        }
-
-        .theme-toggle i {
-            font-size: 20px;
+        .db-page-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
             color: var(--text-primary);
+            line-height: 1;
         }
 
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
+        .db-page-sub {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
+        .theme-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px 6px 10px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
             box-shadow: var(--shadow);
-            transition: all 0.3s ease;
+        }
+        .theme-pill i { font-size: 14px; }
+
+        /* ══════════════════════════════════════
+           DESKTOP LAYOUT
+        ══════════════════════════════════════ */
+        .desktop-view { display: block; }
+        .mobile-view  { display: none; }
+
+        .db-grid {
+            display: grid;
+            grid-template-columns: 1fr 288px;
+            gap: 16px;
+            align-items: start;
         }
 
-        .card:hover {
-            box-shadow: var(--shadow-hover);
-        }
+        .db-col { display: flex; flex-direction: column; gap: 14px; }
 
-        .welcome-section {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            border-radius: 12px;
-            padding: 32px;
-            color: white;
-            position: relative;
+        /* ── Welcome card ── */
+        .welcome-card {
+            background: var(--bg-navy);
+            border: 1px solid var(--border-navy);
+            border-radius: var(--radius);
+            padding: 22px 22px 0;
             overflow: hidden;
         }
 
-        .welcome-section::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
+        .welcome-eyebrow { display:flex; align-items:center; gap:6px; margin-bottom:10px; }
+        .welcome-dot { width:6px; height:6px; border-radius:50%; background:#5DCAA5; flex-shrink:0; }
+        .welcome-date {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px; color: var(--text-navy-dim);
+            letter-spacing: .08em; text-transform: uppercase;
+        }
+        .welcome-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px; font-weight: 800;
+            color: var(--text-navy); line-height: 1.15; margin-bottom: 5px;
+        }
+        .welcome-sub { font-size: 13px; color: var(--text-navy-dim); margin-bottom: 20px; }
+
+        .welcome-strip {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            border-top: 1px solid var(--border-navy); margin: 0 -22px;
+        }
+        .ws-cell { padding:14px 10px; text-align:center; position:relative; }
+        .ws-cell + .ws-cell::before {
+            content:''; position:absolute; left:0; top:20%; bottom:20%;
+            width:1px; background:var(--border-navy);
+        }
+        .ws-num {
+            font-family: 'Syne', sans-serif; font-size:22px; font-weight:800;
+            color: var(--text-accent); line-height:1;
+        }
+        .ws-lbl {
+            font-family: 'DM Mono', monospace; font-size:9px;
+            color: var(--text-navy-dim); letter-spacing:.06em;
+            text-transform:uppercase; margin-top:4px; line-height:1.3;
         }
 
-        .welcome-section h4 {
-            font-weight: 600;
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .welcome-section p {
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-        }
-
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            color: white;
-            margin-bottom: 16px;
-        }
-
-        .stat-icon.success { background: #10b981; }
-        .stat-icon.danger { background: #ef4444; }
-        .stat-icon.primary { background: #3b82f6; }
-        .stat-icon.info { background: #06b6d4; }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
-        .stat-change {
-            font-size: 13px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 10px;
-            border-radius: 20px;
-        }
-
-        .stat-change.positive {
-            color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .stat-change.negative {
-            color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
-        }
-
+        /* ── Chart card ── */
         .chart-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px 20px 8px; box-shadow: var(--shadow);
         }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
+        .chart-head {
+            display:flex; justify-content:space-between; align-items:flex-start;
+            margin-bottom:6px; gap:8px;
         }
-
         .chart-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-primary);
+            font-family: 'Syne', sans-serif; font-size:15px; font-weight:700;
+            color: var(--text-primary); margin-bottom:2px;
+        }
+        .chart-sub  { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-hint); }
+        .chart-right { text-align:right; flex-shrink:0; }
+        .chart-total {
+            font-family: 'Syne', sans-serif; font-size:26px; font-weight:800;
+            color: var(--text-primary); line-height:1;
+        }
+        .chart-total-lbl {
+            font-family: 'DM Mono', monospace; font-size:10px;
+            color: var(--text-hint); letter-spacing:.07em; text-transform:uppercase; margin-top:2px;
         }
 
-        .chart-badge {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
+        .trend-badge {
+            display:inline-flex; align-items:center; gap:3px;
+            font-family:'DM Mono',monospace; font-size:11px; font-weight:500;
+            padding:3px 8px; border-radius:4px; margin-bottom:5px;
+        }
+        .trend-badge.up   { color:#085041; background:#9FE1CB; }
+        .trend-badge.down { color:#712B13; background:#F5C4B3; }
+        .trend-badge svg  { width:10px; height:10px; stroke:currentColor; stroke-width:2.5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+
+        /* ── Stat cards ── */
+        .stat-card {
+            background: var(--bg-surface); border:1px solid var(--border);
+            border-radius: var(--radius); padding:16px 18px; box-shadow:var(--shadow);
+        }
+        .stat-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+        .stat-icon { width:36px; height:36px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .stat-icon svg { width:16px; height:16px; fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+
+        .stat-icon.teal  { background:#E1F5EE; } .stat-icon.teal  svg { stroke:#0F6E56; }
+        .stat-icon.coral { background:#FAECE7; } .stat-icon.coral svg { stroke:#993C1D; }
+        .stat-icon.blue  { background:#E6F1FB; } .stat-icon.blue  svg { stroke:#185FA5; }
+        .stat-icon.amber { background:#FAEEDA; } .stat-icon.amber svg { stroke:#854F0B; }
+
+        [data-theme="dark"] .stat-icon.teal  { background:rgba(29,158,117,.15); }
+        [data-theme="dark"] .stat-icon.coral { background:rgba(216,90,48,.15);  }
+        [data-theme="dark"] .stat-icon.blue  { background:rgba(55,138,221,.15); }
+        [data-theme="dark"] .stat-icon.amber { background:rgba(186,117,23,.15); }
+
+        .stat-badge { font-family:'DM Mono',monospace; font-size:10px; font-weight:500; padding:3px 8px; border-radius:4px; letter-spacing:.03em; }
+        .stat-badge.up   { color:#085041; background:#9FE1CB; }
+        .stat-badge.down { color:#712B13; background:#F5C4B3; }
+        .stat-badge.flat { color:#5F5E5A; background:#F1EFE8; }
+        .stat-badge.info { color:#3B6D11; background:#EAF3DE; }
+        [data-theme="dark"] .stat-badge.flat { color:#c8d0d8; background:#2a3040; }
+        [data-theme="dark"] .stat-badge.info { color:#86efac; background:#14311f; }
+
+        .stat-val { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; color:var(--text-primary); line-height:1; }
+        .stat-lbl { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-hint); text-transform:uppercase; letter-spacing:.07em; margin-top:4px; }
+        .stat-divider { height:1px; background:var(--border); margin:12px 0 10px; }
+        .stat-sub { font-size:12px; color:var(--text-secondary); }
+
+        /* ══════════════════════════════════════
+           MOBILE LAYOUT
+        ══════════════════════════════════════ */
+        .mob-section { margin-bottom: 16px; }
+
+        .mob-section-title {
+            font-family: 'DM Mono', monospace;
+            font-size: 9px; font-weight: 500;
+            color: var(--text-hint);
+            text-transform: uppercase; letter-spacing: .1em;
+            margin-bottom: 8px;
         }
 
-        .total-metric {
-            text-align: right;
+        /* Quick actions */
+        .quick-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+        .qa-card {
+            display:flex; flex-direction:column; align-items:flex-start;
+            gap:10px; padding:16px 14px; border-radius:var(--radius);
+            text-decoration:none; border:1px solid transparent;
+        }
+        .qa-card.incoming  { background:var(--bg-navy); border-color:var(--border-navy); }
+        .qa-card.outgoing  { background:var(--emerald-dim); border-color:rgba(29,158,117,.2); }
+        [data-theme="dark"] .qa-card.outgoing { background:rgba(29,158,117,.12); border-color:rgba(29,158,117,.25); }
+
+        .qa-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
+        .qa-card.incoming .qa-icon { background:rgba(126,184,247,.15); }
+        .qa-card.outgoing .qa-icon { background:rgba(29,158,117,.2); }
+        .qa-icon svg { width:18px; height:18px; fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+        .qa-card.incoming .qa-icon svg { stroke:var(--text-accent); }
+        .qa-card.outgoing .qa-icon svg { stroke:var(--emerald); }
+
+        .qa-label { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; line-height:1.2; }
+        .qa-card.incoming .qa-label { color:var(--text-navy); }
+        .qa-card.outgoing .qa-label { color:#0F6E56; }
+        [data-theme="dark"] .qa-card.outgoing .qa-label { color:#5DCAA5; }
+
+        .qa-sub { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.06em; text-transform:uppercase; }
+        .qa-card.incoming .qa-sub { color:var(--text-navy-dim); }
+        .qa-card.outgoing .qa-sub { color:rgba(15,110,86,.6); }
+        [data-theme="dark"] .qa-card.outgoing .qa-sub { color:rgba(93,202,165,.5); }
+
+        /* Nav grid */
+        .nav-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+
+        .nav-grid-item {
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            gap:6px; padding:14px 8px;
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:var(--radius); text-decoration:none;
         }
 
-        .total-metric .value {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--text-primary);
+        .ng-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
+        .ng-icon svg { width:16px; height:16px; fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+
+        .ng-icon.teal  { background:#E1F5EE; } .ng-icon.teal  svg { stroke:#0F6E56; }
+        .ng-icon.blue  { background:#E6F1FB; } .ng-icon.blue  svg { stroke:#185FA5; }
+        .ng-icon.amber { background:#FAEEDA; } .ng-icon.amber svg { stroke:#854F0B; }
+        .ng-icon.coral { background:#FAECE7; } .ng-icon.coral svg { stroke:#993C1D; }
+        [data-theme="dark"] .ng-icon.teal  { background:rgba(29,158,117,.15); }
+        [data-theme="dark"] .ng-icon.blue  { background:rgba(55,138,221,.15); }
+        [data-theme="dark"] .ng-icon.amber { background:rgba(186,117,23,.15); }
+        [data-theme="dark"] .ng-icon.coral { background:rgba(216,90,48,.15);  }
+
+        .ng-label {
+            font-family:'DM Mono',monospace;
+            font-size:9px; font-weight:500;
+            color:var(--text-secondary);
+            text-transform:uppercase; letter-spacing:.06em;
+            text-align:center; line-height:1.3;
         }
 
-        .total-metric .label {
-            font-size: 13px;
-            color: var(--text-secondary);
+        /* Mini stat strip */
+        .mob-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+
+        .mob-stat {
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:var(--radius); padding:12px 10px; text-align:center;
+        }
+        .mob-stat-num { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--text-primary); line-height:1; }
+        .mob-stat-lbl { font-family:'DM Mono',monospace; font-size:8px; color:var(--text-hint); text-transform:uppercase; letter-spacing:.06em; margin-top:3px; line-height:1.3; }
+
+        /* Activity log */
+        .activity-list {
+            background:var(--bg-surface); border:1px solid var(--border);
+            border-radius:var(--radius); overflow:hidden;
         }
 
-        .illustration-wrapper {
-            position: relative;
-            z-index: 1;
+        .act-item {
+            display:flex; align-items:center; gap:10px;
+            padding:11px 14px; border-bottom:1px solid var(--border);
+        }
+        .act-item:last-child { border-bottom:none; }
+
+        .act-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+        .act-dot.in  { background:#1D9E75; }
+        .act-dot.out { background:#D85A30; }
+
+        .act-body { flex:1; min-width:0; }
+        .act-number {
+            font-family:'DM Mono',monospace; font-size:11px; font-weight:500;
+            color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .act-sender {
+            font-size:11px; color:var(--text-hint);
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px;
+        }
+        .act-meta { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-hint); white-space:nowrap; flex-shrink:0; }
+
+        .act-type { font-family:'DM Mono',monospace; font-size:9px; font-weight:500; padding:2px 6px; border-radius:3px; flex-shrink:0; }
+        .act-type.in  { color:#085041; background:#9FE1CB; }
+        .act-type.out { color:#712B13; background:#F5C4B3; }
+
+        /* Bottom tab bar */
+        .bottom-tab {
+            position:fixed; bottom:0; left:0; right:0;
+            height:56px;
+            background:var(--bg-surface); border-top:1px solid var(--border);
+            display:flex; align-items:stretch;
+            z-index:9999;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        .illustration-wrapper img {
-            max-width: 100%;
-            height: auto;
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+        .tab-item {
+            flex:1; display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            gap:3px; text-decoration:none; color:var(--text-hint);
+        }
+        .tab-item.active { color:var(--emerald); }
+        .tab-item svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+        .tab-label { font-family:'DM Mono',monospace; font-size:8px; font-weight:500; letter-spacing:.04em; text-transform:uppercase; }
+
+        .mob-bottom-spacer { height:72px; }
+
+        /* ══════════════════════════════════════
+           BREAKPOINT — ADAPTIVE SWITCH
+           FIX: Jangan override transition global
+           karena konflik dengan Sneat sidebar toggle.
+        ══════════════════════════════════════ */
+        @media (min-width: 1200px) {
+            .desktop-view { display:block; }
+            .mobile-view  { display:none; }
+            .bottom-tab   { display:none !important; }
         }
 
-        [data-theme="dark"] .illustration-wrapper img {
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5)) brightness(0.9);
-        }
+        @media (max-width: 1199.98px) {
+            .desktop-view { display:none; }
+            .mobile-view  { display:block; }
 
-        @media (max-width: 768px) {
-            .theme-toggle {
-                top: 10px;
-                right: 10px;
-                padding: 6px 12px;
+            /*
+             * PENTING: Matikan transition hanya pada elemen dashboard —
+             * BUKAN global `*`. Global override akan konflik dengan
+             * Sneat sidebar yang pakai transform:translateX untuk toggle.
+             */
+            .db-topbar, .mob-section,
+            .quick-actions, .qa-card,
+            .nav-grid, .nav-grid-item,
+            .mob-stats, .mob-stat,
+            .activity-list, .act-item,
+            .stat-card, .chart-card, .welcome-card,
+            .bottom-tab, .tab-item, .theme-pill {
+                transition: none !important;
+                -webkit-transition: none !important;
+                box-shadow: none !important;
             }
+
+            body { padding-bottom: 0; }
+            .db-topbar { margin-bottom: 14px; }
+            .db-page-title { font-size: 16px; }
         }
     </style>
 @endpush
 
 @push('script')
-    <script src="{{asset('sneat/vendor/libs/apex-charts/apexcharts.js')}}"></script>
+    <script src="{{ asset('sneat/vendor/libs/apex-charts/apexcharts.js') }}"></script>
     <script>
-        // Dark Mode Toggle
+        /* ── Theme toggle ── */
+        const html        = document.documentElement;
         const themeToggle = document.getElementById('themeToggle');
-        const htmlElement = document.documentElement;
-        const sunIcon = document.getElementById('sunIcon');
-        const moonIcon = document.getElementById('moonIcon');
+        const sunIcon     = document.getElementById('sunIcon');
+        const moonIcon    = document.getElementById('moonIcon');
+        const themeLabel  = document.getElementById('themeLabel');
 
-        // Check saved theme
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        htmlElement.setAttribute('data-theme', currentTheme);
-        updateIcons(currentTheme);
+        const saved = localStorage.getItem('theme') || 'light';
+        applyTheme(saved);
 
         themeToggle.addEventListener('click', () => {
-            const theme = htmlElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            htmlElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-            updateIcons(theme);
-            
-            // Redraw chart with new theme
-            chart.destroy();
-            initChart();
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+            localStorage.setItem('theme', next);
+            if (typeof chart !== 'undefined' && chart) {
+                chart.destroy();
+                renderChart();
+            }
         });
 
-        function updateIcons(theme) {
-            if (theme === 'dark') {
-                sunIcon.style.display = 'block';
-                moonIcon.style.display = 'none';
-            } else {
-                sunIcon.style.display = 'none';
-                moonIcon.style.display = 'block';
-            }
+        function applyTheme(theme) {
+            html.setAttribute('data-theme', theme);
+            const dark = theme === 'dark';
+            sunIcon.style.display  = dark ? 'inline' : 'none';
+            moonIcon.style.display = dark ? 'none'   : 'inline';
+            themeLabel.textContent = dark ? 'Light'  : 'Dark';
         }
 
-        // Chart Configuration
+        /* ── Chart (desktop only — tidak dirender di mobile) ── */
+        function getPalette() {
+            const dark = html.getAttribute('data-theme') === 'dark';
+            return dark
+                ? { bar:['#5DCAA5','#F0997B','#85B7EB'], label:'#5a7a9a', grid:'#1e2d45' }
+                : { bar:['#1D9E75','#D85A30','#378ADD'], label:'#94a3b8', grid:'#edf0f5' };
+        }
+
         let chart;
 
-        function getChartColors() {
-            const isDark = htmlElement.getAttribute('data-theme') === 'dark';
-            return {
-                text: isDark ? '#cbd5e0' : '#718096',
-                grid: isDark ? '#4a5568' : '#e2e8f0',
-                tooltip: isDark ? '#2d3748' : '#ffffff'
-            };
-        }
+        function renderChart() {
+            const el = document.querySelector('#today-graphic');
+            if (!el) return;
 
-        function initChart() {
-            const colors = getChartColors();
-            
-            const options = {
+            const p      = getPalette();
+            const isDark = html.getAttribute('data-theme') === 'dark';
+
+            chart = new ApexCharts(el, {
                 chart: {
-                    type: 'bar',
-                    height: 280,
-                    toolbar: {
-                        show: false
+                    type: 'bar', height: 225,
+                    toolbar:    { show: false },
+                    background: 'transparent',
+                    fontFamily: "'DM Sans', sans-serif",
+                    animations: {
+                        enabled: true, easing: 'easeOutCubic', speed: 450,
+                        animateGradually: { enabled: true, delay: 80 }
                     },
-                    background: 'transparent'
                 },
                 series: [{
                     name: '{{ __('dashboard.letter_transaction') }}',
-                    data: [{{ $todayIncomingLetter }}, {{ $todayOutgoingLetter }}, {{ $todayDispositionLetter }}]
+                    data: [
+                        {{ $todayIncomingLetter }},
+                        {{ $todayOutgoingLetter }},
+                        {{ $todayDispositionLetter }}
+                    ]
                 }],
                 plotOptions: {
                     bar: {
-                        borderRadius: 8,
-                        columnWidth: '45%',
+                        borderRadius: 7,
+                        borderRadiusApplication: 'end',
+                        columnWidth: '46%',
                         distributed: true,
-                        dataLabels: {
-                            position: 'top'
-                        }
+                        dataLabels: { position: 'top' }
                     }
                 },
-                colors: ['#10b981', '#ef4444', '#3b82f6'],
+                colors:  p.bar,
+                fill:    { type: 'solid' },
                 dataLabels: {
-                    enabled: true,
-                    offsetY: -20,
+                    enabled: true, offsetY: -20,
                     style: {
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        colors: [colors.text]
-                    }
+                        fontSize: '11px', fontWeight: 600,
+                        fontFamily: "'DM Mono', monospace",
+                        colors: [p.label]
+                    },
+                    background: { enabled: false }
                 },
                 xaxis: {
                     categories: [
                         '{{ __('dashboard.incoming_letter') }}',
                         '{{ __('dashboard.outgoing_letter') }}',
-                        '{{ __('dashboard.disposition_letter') }}',
+                        '{{ __('dashboard.disposition_letter') }}'
                     ],
-                    labels: {
-                        style: {
-                            colors: colors.text,
-                            fontSize: '12px'
-                        }
-                    },
-                    axisBorder: {
-                        show: false
-                    }
+                    labels: { style: { colors: p.label, fontSize: '11px', fontFamily: "'DM Mono', monospace" } },
+                    axisBorder: { show: false },
+                    axisTicks:  { show: false }
                 },
                 yaxis: {
-                    labels: {
-                        style: {
-                            colors: colors.text,
-                            fontSize: '12px'
-                        }
-                    }
+                    labels: { style: { colors: p.label, fontSize: '11px', fontFamily: "'DM Mono', monospace" } }
                 },
                 grid: {
-                    borderColor: colors.grid,
-                    strokeDashArray: 4,
-                    xaxis: {
-                        lines: {
-                            show: false
-                        }
-                    }
+                    borderColor: p.grid, strokeDashArray: 4,
+                    xaxis: { lines: { show: false } },
+                    padding: { top: 8, bottom: 0 }
                 },
-                legend: {
-                    show: false
-                },
+                legend:  { show: false },
                 tooltip: {
-                    theme: htmlElement.getAttribute('data-theme'),
-                    y: {
-                        formatter: function(val) {
-                            return val + " letters"
-                        }
-                    }
-                }
-            };
+                    theme: isDark ? 'dark' : 'light',
+                    y: { formatter: v => `${v} surat` }
+                },
+            });
 
-            chart = new ApexCharts(document.querySelector("#today-graphic"), options);
             chart.render();
         }
 
-        // Initialize chart
-        initChart();
+        /* Hanya render chart di desktop — hemat resource di mobile */
+        if (window.innerWidth >= 1200) {
+            renderChart();
+        }
+
+        let rsz;
+        window.addEventListener('resize', () => {
+            clearTimeout(rsz);
+            rsz = setTimeout(() => {
+                if (window.innerWidth >= 1200 && !chart) {
+                    renderChart();
+                }
+            }, 300);
+        });
     </script>
 @endpush
 
+{{-- ══════════════════════════════════════════════════════════
+     @section('content') — WAJIB ADA, INI YANG SERING HILANG
+     Jika section ini tidak ada / salah nama → blank total
+══════════════════════════════════════════════════════════ --}}
 @section('content')
-    <!-- Theme Toggle Button -->
-    <div class="theme-toggle" id="themeToggle">
-        <i class='bx bx-sun' id="sunIcon" style="display: none;"></i>
+
+{{-- ── Top Bar (tampil di semua ukuran) ── --}}
+<div class="db-topbar">
+    <div>
+        <div class="db-page-title">Dashboard</div>
+        <div class="db-page-sub">{{ $currentDate }}</div>
+    </div>
+    <button class="theme-pill" id="themeToggle" type="button">
+        <i class='bx bx-sun'  id="sunIcon"  style="display:none"></i>
         <i class='bx bx-moon' id="moonIcon"></i>
-    </div>
+        <span id="themeLabel">Dark</span>
+    </button>
+</div>
 
-    <div class="row">
-        <!-- Welcome Section -->
-        <div class="col-lg-8 mb-4">
-            <div class="welcome-section">
-                <div class="row align-items-center">
-                    <div class="col-md-7">
-                        <h4>{{ $greeting }}</h4>
-                        <p class="mb-3">{{ $currentDate }}</p>
-                        <small style="opacity: 0.9;">{{ __('dashboard.today_report') }}</small>
+{{-- ══════════════════════════════════════
+     DESKTOP VIEW ≥ 1200px
+══════════════════════════════════════ --}}
+<div class="desktop-view">
+    <div class="db-grid">
+
+        {{-- Kolom Kiri --}}
+        <div class="db-col">
+
+            {{-- Welcome card --}}
+            <div class="welcome-card">
+                <div class="welcome-eyebrow">
+                    <div class="welcome-dot"></div>
+                    <div class="welcome-date">{{ $currentDate }}</div>
+                </div>
+                <div class="welcome-name">{{ $greeting }}</div>
+                <div class="welcome-sub">{{ __('dashboard.today_report') }}</div>
+                <div class="welcome-strip">
+                    <div class="ws-cell">
+                        <div class="ws-num">{{ $todayIncomingLetter }}</div>
+                        <div class="ws-lbl">{{ __('dashboard.incoming_letter') }}</div>
                     </div>
-                    <div class="col-md-5 text-center">
-                        <div class="illustration-wrapper">
-                            <svg width="140" height="140" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <!-- Background circle -->
-                                <circle cx="100" cy="100" r="90" fill="rgba(255,255,255,0.1)"/>
-                                
-                                <!-- Blackboard -->
-                                <rect x="50" y="40" width="100" height="70" rx="4" fill="rgba(255,255,255,0.2)"/>
-                                <rect x="55" y="45" width="90" height="60" fill="rgba(255,255,255,0.15)"/>
-                                
-                                <!-- Chart on blackboard -->
-                                <polyline points="70,85 80,75 90,80 100,65 110,70 120,60" stroke="rgba(255,255,255,0.4)" stroke-width="2" fill="none"/>
-                                <line x1="65" y1="90" x2="135" y2="90" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
-                                <line x1="65" y1="90" x2="65" y2="50" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
-                                
-                                <!-- Teacher head -->
-                                <circle cx="100" cy="130" r="18" fill="rgba(255,255,255,0.9)"/>
-                                
-                                <!-- Teacher body -->
-                                <rect x="88" y="145" width="24" height="35" rx="12" fill="rgba(255,255,255,0.8)"/>
-                                
-                                <!-- Arms -->
-                                <ellipse cx="80" cy="155" rx="8" ry="15" fill="rgba(255,255,255,0.8)" transform="rotate(-20 80 155)"/>
-                                <ellipse cx="120" cy="155" rx="8" ry="15" fill="rgba(255,255,255,0.8)" transform="rotate(20 120 155)"/>
-                                
-                                <!-- Pointing hand -->
-                                <circle cx="130" cy="75" r="5" fill="rgba(255,255,255,0.9)"/>
-                                <line x1="120" y1="150" x2="130" y2="75" stroke="rgba(255,255,255,0.8)" stroke-width="3" stroke-linecap="round"/>
-                                
-                                <!-- Book -->
-                                <rect x="70" y="160" width="15" height="12" rx="1" fill="rgba(255,255,255,0.6)"/>
-                                <line x1="77.5" y1="160" x2="77.5" y2="172" stroke="rgba(255,255,255,0.9)" stroke-width="1"/>
-                            </svg>
-                        </div>
+                    <div class="ws-cell">
+                        <div class="ws-num">{{ $todayOutgoingLetter }}</div>
+                        <div class="ws-lbl">{{ __('dashboard.outgoing_letter') }}</div>
+                    </div>
+                    <div class="ws-cell">
+                        <div class="ws-num">{{ $todayDispositionLetter }}</div>
+                        <div class="ws-lbl">{{ __('dashboard.disposition_letter') }}</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Chart Section -->
-            <div class="mt-4">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div>
-                            <div class="chart-title">{{ __('dashboard.today_graphic') }}</div>
-                            <span class="chart-badge mt-2">{{ __('dashboard.today') }}</span>
-                        </div>
-                        <div class="total-metric">
-                            @if($percentageLetterTransaction != 0)
-                                <span class="stat-change {{ $percentageLetterTransaction > 0 ? 'positive' : 'negative' }}">
-                                    <i class='bx bx-{{ $percentageLetterTransaction > 0 ? 'trending-up' : 'trending-down' }}'></i>
-                                    {{ abs($percentageLetterTransaction) }}%
-                                </span>
-                            @endif
-                            <div class="value">{{ $todayLetterTransaction }}</div>
-                            <div class="label">Total Transactions</div>
-                        </div>
+            {{-- Chart --}}
+            <div class="chart-card">
+                <div class="chart-head">
+                    <div>
+                        <div class="chart-title">{{ __('dashboard.today_graphic') }}</div>
+                        <div class="chart-sub">{{ __('dashboard.today') }}</div>
                     </div>
-                    <div id="today-graphic"></div>
+                    <div class="chart-right">
+                        @if($percentageLetterTransaction != 0)
+                            <span class="trend-badge {{ $percentageLetterTransaction > 0 ? 'up' : 'down' }}">
+                                @if($percentageLetterTransaction > 0)
+                                    <svg viewBox="0 0 12 12"><path d="M2 9l3-3 2 2 3-4"/></svg>
+                                @else
+                                    <svg viewBox="0 0 12 12"><path d="M2 3l3 3 2-2 3 4"/></svg>
+                                @endif
+                                {{ abs($percentageLetterTransaction) }}%
+                            </span><br>
+                        @endif
+                        <div class="chart-total">{{ $todayLetterTransaction }}</div>
+                        <div class="chart-total-lbl">Total Surat</div>
+                    </div>
                 </div>
+                <div id="today-graphic"></div>
             </div>
+
         </div>
 
-        <!-- Stats Cards -->
-        <div class="col-lg-4">
-            <div class="row">
-                <!-- Incoming Letter -->
-                <div class="col-lg-12 col-md-6 col-sm-6 mb-4">
-                    <div class="stat-card">
-                        <div class="stat-icon success">
-                            <i class='bx bx-envelope'></i>
-                        </div>
-                        <div class="stat-label">{{ __('dashboard.incoming_letter') }}</div>
-                        <div class="stat-value">{{ $todayIncomingLetter }}</div>
-                        @if($percentageIncomingLetter != 0)
-                            <span class="stat-change {{ $percentageIncomingLetter > 0 ? 'positive' : 'negative' }}">
-                                <i class='bx bx-{{ $percentageIncomingLetter > 0 ? 'up-arrow-alt' : 'down-arrow-alt' }}'></i>
-                                {{ abs($percentageIncomingLetter) }}% today
-                            </span>
-                        @else
-                            <span class="stat-change" style="color: var(--text-secondary); background: transparent;">
-                                No change
-                            </span>
-                        @endif
-                    </div>
-                </div>
+        {{-- Kolom Kanan — Stat Cards --}}
+        <div class="db-col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 
-                <!-- Outgoing Letter -->
-                <div class="col-lg-12 col-md-6 col-sm-6 mb-4">
-                    <div class="stat-card">
-                        <div class="stat-icon danger">
-                            <i class='bx bx-envelope'></i>
-                        </div>
-                        <div class="stat-label">{{ __('dashboard.outgoing_letter') }}</div>
-                        <div class="stat-value">{{ $todayOutgoingLetter }}</div>
-                        @if($percentageOutgoingLetter != 0)
-                            <span class="stat-change {{ $percentageOutgoingLetter > 0 ? 'positive' : 'negative' }}">
-                                <i class='bx bx-{{ $percentageOutgoingLetter > 0 ? 'up-arrow-alt' : 'down-arrow-alt' }}'></i>
-                                {{ abs($percentageOutgoingLetter) }}% today
-                            </span>
-                        @else
-                            <span class="stat-change" style="color: var(--text-secondary); background: transparent;">
-                                No change
-                            </span>
-                        @endif
+            {{-- Surat Masuk --}}
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon teal">
+                        <svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 6l6 4 6-4"/></svg>
                     </div>
-                </div>
-
-                <!-- Disposition Letter -->
-                <div class="col-lg-12 col-md-6 col-sm-6 mb-4">
-                    <div class="stat-card">
-                        <div class="stat-icon primary">
-                            <i class='bx bx-envelope'></i>
-                        </div>
-                        <div class="stat-label">{{ __('dashboard.disposition_letter') }}</div>
-                        <div class="stat-value">{{ $todayDispositionLetter }}</div>
-                        @if($percentageDispositionLetter != 0)
-                            <span class="stat-change {{ $percentageDispositionLetter > 0 ? 'positive' : 'negative' }}">
-                                <i class='bx bx-{{ $percentageDispositionLetter > 0 ? 'up-arrow-alt' : 'down-arrow-alt' }}'></i>
-                                {{ abs($percentageDispositionLetter) }}% today
-                            </span>
-                        @else
-                            <span class="stat-change" style="color: var(--text-secondary); background: transparent;">
-                                No change
-                            </span>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Active Users -->
-                <div class="col-lg-12 col-md-6 col-sm-6 mb-4">
-                    <div class="stat-card">
-                        <div class="stat-icon info">
-                            <i class='bx bx-user-check'></i>
-                        </div>
-                        <div class="stat-label">{{ __('dashboard.active_user') }}</div>
-                        <div class="stat-value">{{ $activeUser }}</div>
-                        <span class="stat-change" style="color: var(--text-secondary); background: transparent;">
-                            Total active users
+                    @if($percentageIncomingLetter != 0)
+                        <span class="stat-badge {{ $percentageIncomingLetter > 0 ? 'up' : 'down' }}">
+                            {{ $percentageIncomingLetter > 0 ? '+' : '' }}{{ $percentageIncomingLetter }}%
                         </span>
-                    </div>
+                    @else
+                        <span class="stat-badge flat">—</span>
+                    @endif
                 </div>
+                <div class="stat-val">{{ $todayIncomingLetter }}</div>
+                <div class="stat-lbl">{{ __('dashboard.incoming_letter') }}</div>
+                <div class="stat-divider"></div>
+                <div class="stat-sub">
+                    @if($percentageIncomingLetter > 0) Naik vs kemarin
+                    @elseif($percentageIncomingLetter < 0) Turun vs kemarin
+                    @else Sama dengan kemarin @endif
+                </div>
+            </div>
+
+            {{-- Surat Keluar --}}
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon coral">
+                        <svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 6l6 4 6-4"/><path d="M10 9l3-3M10 6h3v3"/></svg>
+                    </div>
+                    @if($percentageOutgoingLetter != 0)
+                        <span class="stat-badge {{ $percentageOutgoingLetter > 0 ? 'up' : 'down' }}">
+                            {{ $percentageOutgoingLetter > 0 ? '+' : '' }}{{ $percentageOutgoingLetter }}%
+                        </span>
+                    @else
+                        <span class="stat-badge flat">—</span>
+                    @endif
+                </div>
+                <div class="stat-val">{{ $todayOutgoingLetter }}</div>
+                <div class="stat-lbl">{{ __('dashboard.outgoing_letter') }}</div>
+                <div class="stat-divider"></div>
+                <div class="stat-sub">
+                    @if($percentageOutgoingLetter > 0) Naik vs kemarin
+                    @elseif($percentageOutgoingLetter < 0) Turun vs kemarin
+                    @else Sama dengan kemarin @endif
+                </div>
+            </div>
+
+            {{-- Disposisi --}}
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon blue">
+                        <svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h7M3 12h4"/><path d="M12 10l2 2-2 2"/></svg>
+                    </div>
+                    @if($percentageDispositionLetter != 0)
+                        <span class="stat-badge {{ $percentageDispositionLetter > 0 ? 'up' : 'down' }}">
+                            {{ $percentageDispositionLetter > 0 ? '+' : '' }}{{ $percentageDispositionLetter }}%
+                        </span>
+                    @else
+                        <span class="stat-badge flat">—</span>
+                    @endif
+                </div>
+                <div class="stat-val">{{ $todayDispositionLetter }}</div>
+                <div class="stat-lbl">{{ __('dashboard.disposition_letter') }}</div>
+                <div class="stat-divider"></div>
+                <div class="stat-sub">
+                    @if($percentageDispositionLetter > 0) Naik vs kemarin
+                    @elseif($percentageDispositionLetter < 0) Turun vs kemarin
+                    @else Sama dengan kemarin @endif
+                </div>
+            </div>
+
+            {{-- Pengguna Aktif --}}
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon amber">
+                        <svg viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="2.5"/><path d="M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5"/></svg>
+                    </div>
+                    <span class="stat-badge info">Aktif</span>
+                </div>
+                <div class="stat-val">{{ $activeUser }}</div>
+                <div class="stat-lbl">{{ __('dashboard.active_user') }}</div>
+                <div class="stat-divider"></div>
+                <div class="stat-sub">Total pengguna terdaftar</div>
+            </div>
+
+        </div>
+    </div>
+</div>{{-- end .desktop-view --}}
+
+
+{{-- ══════════════════════════════════════
+     MOBILE VIEW < 1200px
+     Struktur berbeda total dari desktop
+══════════════════════════════════════ --}}
+<div class="mobile-view">
+
+    {{-- Mini stat strip --}}
+    <div class="mob-section">
+        <div class="mob-section-title">Hari Ini</div>
+        <div class="mob-stats">
+            <div class="mob-stat">
+                <div class="mob-stat-num">{{ $todayIncomingLetter }}</div>
+                <div class="mob-stat-lbl">Masuk</div>
+            </div>
+            <div class="mob-stat">
+                <div class="mob-stat-num">{{ $todayOutgoingLetter }}</div>
+                <div class="mob-stat-lbl">Keluar</div>
+            </div>
+            <div class="mob-stat">
+                <div class="mob-stat-num">{{ $todayDispositionLetter }}</div>
+                <div class="mob-stat-lbl">Disposisi</div>
             </div>
         </div>
     </div>
+
+    {{-- Quick Action Hub --}}
+    <div class="mob-section">
+        <div class="mob-section-title">Aksi Cepat</div>
+        <div class="quick-actions">
+            <a href="{{ route('transaction.incoming.create') }}" class="qa-card incoming">
+                <div class="qa-icon">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="15" rx="2"/><path d="M3 9l9 6 9-6"/><path d="M12 15v5M9 17l3 3 3-3"/></svg>
+                </div>
+                <div>
+                    <div class="qa-label">Tambah Surat Masuk</div>
+                    <div class="qa-sub">Input · Record</div>
+                </div>
+            </a>
+            <a href="{{ route('transaction.outgoing.create') }}" class="qa-card outgoing">
+                <div class="qa-icon">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="15" rx="2"/><path d="M3 9l9 6 9-6"/><path d="M12 10V5M9 8l3-3 3 3"/></svg>
+                </div>
+                <div>
+                    <div class="qa-label">Tambah Surat Keluar</div>
+                    <div class="qa-sub">Input · Record</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    {{-- Navigation Grid 2×2 --}}
+    <div class="mob-section">
+        <div class="mob-section-title">Menu</div>
+        <div class="nav-grid" style="grid-template-columns:repeat(2,1fr);">
+            <a href="{{ route('agenda.incoming') }}" class="nav-grid-item">
+                <div class="ng-icon teal">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+                </div>
+                <div class="ng-label">Agenda Surat</div>
+            </a>
+            <a href="{{ route('transaction.incoming.index') }}" class="nav-grid-item">
+                <div class="ng-icon blue">
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <div class="ng-label">Transaksi</div>
+            </a>
+
+            {{--
+                FIX: route('reference.classification.index') — sesuaikan
+                dengan hasil: php artisan route:list | grep reference
+                Jika route-nya 'reference.index' → ganti baris href di bawah
+            --}}
+            <a href="{{ route('reference.classification.index') }}" class="nav-grid-item">
+                <div class="ng-icon coral">
+                    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h10M4 18h7"/><rect x="14" y="13" width="7" height="7" rx="1"/></svg>
+                </div>
+                <div class="ng-label">Klasifikasi</div>
+            </a>
+
+            @if(auth()->user()->role == 'admin')
+                <a href="{{ route('user.index') }}" class="nav-grid-item">
+                    <div class="ng-icon amber">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <div class="ng-label">Manajemen User</div>
+                </a>
+            @else
+                <a href="{{ route('agenda.outgoing') }}" class="nav-grid-item">
+                    <div class="ng-icon amber">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h8M8 18h5"/></svg>
+                    </div>
+                    <div class="ng-label">Agenda Keluar</div>
+                </a>
+            @endif
+        </div>
+    </div>
+
+    {{-- Recent Activity Log --}}
+    <div class="mob-section">
+        <div class="mob-section-title">Log Surat Terbaru</div>
+        <div class="activity-list">
+
+            @forelse($recentLetters as $letter)
+                @php
+                    // AUTO-DETECT nomor surat.
+                    //     Coba semua kemungkinan nama kolom yang umum dipakai
+                    //     di project e-surat Laravel. Sesuaikan urutan prioritas
+                    //     kalau kolom di tabel kamu berbeda.
+                    $nomorSurat = $letter->letter_number
+                        ?? $letter->number
+                        ?? $letter->nomor_surat
+                        ?? $letter->no_surat
+                        ?? $letter->nomor
+                        ?? $letter->perihal
+                        ?? $letter->subject
+                        ?? '—';
+
+                    // {{--
+                    //     AUTO-DETECT tipe surat.
+                    //     Nilai yang diterima: 'incoming'/'masuk'/'in'
+                    //     atau 'outgoing'/'keluar'/'out'.
+                    // --}}
+                    $rawTipe    = strtolower(
+                        $letter->letter_type
+                        ?? $letter->type
+                        ?? $letter->jenis
+                        ?? $letter->jenis_surat
+                        ?? ''
+                    );
+                    $isIncoming = in_array($rawTipe, ['incoming', 'masuk', 'in']);
+
+                    // {{--
+                    //     AUTO-DETECT pengirim (surat masuk) / penerima (surat keluar).
+                    //     Coba kolom langsung dulu, lalu coba relasi model jika ada.
+                    // --}}
+                    if ($isIncoming) {
+                        $pihak = $letter->from
+                            ?? $letter->sender
+                            ?? $letter->pengirim
+                            ?? $letter->asal
+                            ?? $letter->instansi_pengirim
+                            ?? ($letter->senderRelation->name ?? null)
+                            ?? ($letter->from_name ?? null)
+                            ?? '-';
+                    } else {
+                        $pihak = $letter->to
+                            ?? $letter->recipient
+                            ?? $letter->penerima
+                            ?? $letter->tujuan
+                            ?? $letter->instansi_tujuan
+                            ?? ($letter->recipientRelation->name ?? null)
+                            ?? ($letter->to_name ?? null)
+                            ?? '-';
+                    }
+
+                    // {{--
+                    //     AUTO-DETECT tanggal surat.
+                    //     Prioritaskan tanggal surat itu sendiri,
+                    //     baru fallback ke created_at.
+                    // --}}
+                    $rawTanggal = $letter->letter_date
+                        ?? $letter->tanggal_surat
+                        ?? $letter->tanggal
+                        ?? $letter->date
+                        ?? $letter->created_at
+                        ?? null;
+                    $tanggalFmt = $rawTanggal
+                        ? \Carbon\Carbon::parse($rawTanggal)->format('d/m')
+                        : '—';
+
+                    $badgeClass = $isIncoming ? 'in'    : 'out';
+                    $badgeLabel = $isIncoming ? 'Masuk' : 'Keluar';
+                @endphp
+
+                <div class="act-item">
+                    <div class="act-dot {{ $badgeClass }}"></div>
+                    <div class="act-body">
+                        <div class="act-number">{{ $nomorSurat }}</div>
+                        <div class="act-sender">{{ $pihak }}</div>
+                    </div>
+                    <span class="act-type {{ $badgeClass }}">{{ $badgeLabel }}</span>
+                    <div class="act-meta">{{ $tanggalFmt }}</div>
+                </div>
+
+            @empty
+                <div style="padding:20px 14px; text-align:center; font-family:'DM Mono',monospace; font-size:11px; color:var(--text-hint);">
+                    Belum ada aktivitas surat
+                </div>
+            @endforelse
+
+        </div>
+    </div>
+
+    <div class="mob-bottom-spacer"></div>
+
+</div>{{-- end .mobile-view --}}
+
+
+{{-- ══════════════════════════════════════
+     BOTTOM TAB BAR — mobile only
+     Hidden di ≥ 1200px via CSS
+══════════════════════════════════════ --}}
+<nav class="bottom-tab">
+    <a href="{{ route('home') }}"
+       class="tab-item {{ Route::is('home') ? 'active' : '' }}">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="tab-label">Home</span>
+    </a>
+    <a href="{{ route('transaction.incoming.index') }}"
+       class="tab-item {{ Route::is('transaction.incoming.*') ? 'active' : '' }}">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="15" rx="2"/><path d="M3 9l9 6 9-6"/></svg>
+        <span class="tab-label">Masuk</span>
+    </a>
+    <a href="{{ route('agenda.incoming') }}"
+       class="tab-item {{ Route::is('agenda.*') ? 'active' : '' }}">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span class="tab-label">Agenda</span>
+    </a>
+    <a href="{{ route('transaction.outgoing.index') }}"
+       class="tab-item {{ Route::is('transaction.outgoing.*') ? 'active' : '' }}">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="15" rx="2"/><path d="M3 9l9 6 9-6"/><path d="M12 10V5M9 8l3-3 3 3"/></svg>
+        <span class="tab-label">Keluar</span>
+    </a>
+</nav>
+
 @endsection
+{{-- ↑ WAJIB ADA — jangan hapus --}}

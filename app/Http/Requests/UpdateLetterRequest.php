@@ -39,17 +39,20 @@ class UpdateLetterRequest extends FormRequest
      * @return array<string, mixed>
      */
     public function rules(): array
-    {
-        return [
-            'agenda_number' => ['required'],
-            'from' => [Rule::requiredIf($this->type == LetterType::INCOMING->type())],
-            'to' => [Rule::requiredIf($this->type == LetterType::OUTGOING->type())],
-            'reference_number' => ['required', Rule::unique('letters', 'reference_number')->ignore($this->id)],
-            'received_date' => [Rule::requiredIf($this->type == LetterType::INCOMING->type())],
-            'letter_date' => ['required'],
-            'description' => ['required'],
-            'note' => ['nullable'],
-            'classification_code' => ['required'],
-        ];
-    }
+{
+    return [
+        'agenda_number' => ['required'],
+        'from' => [Rule::requiredIf($this->type == LetterType::INCOMING->type())],
+        'to' => [Rule::requiredIf($this->type == LetterType::OUTGOING->type())],
+        
+        // HAPUS Rule::unique NYA BIAR BISA SIMPAN JAM PELAJARAN YANG SAMA
+        'reference_number' => ['required'], 
+        
+        'received_date' => [Rule::requiredIf($this->type == LetterType::INCOMING->type())],
+        'letter_date' => ['required'],
+        'description' => ['required'],
+        'note' => ['nullable'],
+        'classification_code' => ['required'],
+    ];
+}
 }

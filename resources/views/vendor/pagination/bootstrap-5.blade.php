@@ -1,88 +1,51 @@
-@if ($paginator->hasPages())
-    <nav class="d-flex justify-items-center justify-content-between">
-        <div class="d-flex justify-content-between flex-fill d-sm-none">
-            <ul class="pagination">
-                {{-- Previous Page Link --}}
-                @if ($paginator->onFirstPage())
-                    <li class="page-item disabled" aria-disabled="true">
-                        <span class="page-link">@lang('pagination.previous')</span>
-                    </li>
-                @else
-                    <li class="page-item">
-                        <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev">@lang('pagination.previous')</a>
-                    </li>
-                @endif
+<style>
+    /* Pagination Container */
+    .pagination {
+        margin-bottom: 0;
+        gap: 4px; /* Kasih jarak antar kotak biar industrial look */
+    }
 
-                {{-- Next Page Link --}}
-                @if ($paginator->hasMorePages())
-                    <li class="page-item">
-                        <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next">@lang('pagination.next')</a>
-                    </li>
-                @else
-                    <li class="page-item disabled" aria-disabled="true">
-                        <span class="page-link">@lang('pagination.next')</span>
-                    </li>
-                @endif
-            </ul>
-        </div>
+    /* Kotak Angka Standar */
+    .page-link {
+        color: #475569; /* Slate 600 */
+        border: 1px solid #e2e8f0;
+        border-radius: 6px !important;
+        padding: 0.5rem 0.85rem;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        background-color: transparent;
+    }
 
-        <div class="d-none flex-sm-fill d-sm-flex align-items-sm-center justify-content-sm-between">
-            <div>
-                <p class="small text-muted">
-                    {!! __('pagination.showing') !!}
-                    <span class="fw-semibold">{{ $paginator->firstItem() }}</span>
-                    {!! __('pagination.to') !!}
-                    <span class="fw-semibold">{{ $paginator->lastItem() }}</span>
-                    {!! __('pagination.of') !!}
-                    <span class="fw-semibold">{{ $paginator->total() }}</span>
-                    {!! __('pagination.results') !!}
-                </p>
-            </div>
+    /* Hover State */
+    .page-link:hover {
+        background-color: rgba(16, 185, 129, 0.08);
+        border-color: #10b981;
+        color: #10b981;
+        z-index: 2;
+    }
 
-            <div>
-                <ul class="pagination">
-                    {{-- Previous Page Link --}}
-                    @if ($paginator->onFirstPage())
-                        <li class="page-item disabled" aria-disabled="true" aria-label="@lang('pagination.previous')">
-                            <span class="page-link" aria-hidden="true">&lsaquo;</span>
-                        </li>
-                    @else
-                        <li class="page-item">
-                            <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="@lang('pagination.previous')">&lsaquo;</a>
-                        </li>
-                    @endif
+    /* Active State (Angka yang sedang dibuka) */
+    .page-item.active .page-link {
+        background-color: #10b981 !important; /* Emerald */
+        border-color: #10b981 !important;
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+    }
 
-                    {{-- Pagination Elements --}}
-                    @foreach ($elements as $element)
-                        {{-- "Three Dots" Separator --}}
-                        @if (is_string($element))
-                            <li class="page-item disabled" aria-disabled="true"><span class="page-link">{{ $element }}</span></li>
-                        @endif
+    /* Disabled State (Tanda panah mati) */
+    .page-item.disabled .page-link {
+        background-color: transparent;
+        color: #cbd5e1;
+        border-color: #f1f5f9;
+    }
 
-                        {{-- Array Of Links --}}
-                        @if (is_array($element))
-                            @foreach ($element as $page => $url)
-                                @if ($page == $paginator->currentPage())
-                                    <li class="page-item active" aria-current="page"><span class="page-link">{{ $page }}</span></li>
-                                @else
-                                    <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
-                                @endif
-                            @endforeach
-                        @endif
-                    @endforeach
-
-                    {{-- Next Page Link --}}
-                    @if ($paginator->hasMorePages())
-                        <li class="page-item">
-                            <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="@lang('pagination.next')">&rsaquo;</a>
-                        </li>
-                    @else
-                        <li class="page-item disabled" aria-disabled="true" aria-label="@lang('pagination.next')">
-                            <span class="page-link" aria-hidden="true">&rsaquo;</span>
-                        </li>
-                    @endif
-                </ul>
-            </div>
-        </div>
-    </nav>
-@endif
+    /* Teks "Showing x to y of z" */
+    p.small.text-muted {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.85rem;
+    }
+    
+    p.small.text-muted .fw-semibold {
+        color: #10b981; /* Bikin angkanya ijo biar fokus */
+    }
+</style>

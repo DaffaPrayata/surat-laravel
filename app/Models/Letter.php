@@ -30,8 +30,8 @@ class Letter extends Model
     }
 
     protected $fillable = [
-        'reference_number',
-        'agenda_number',
+        'reference_number',  //jam pelajaran bisa sama,
+        'agenda_number',     //kelas
         'from',
         'to',
         'letter_date',

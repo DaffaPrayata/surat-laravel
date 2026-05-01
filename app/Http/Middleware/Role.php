@@ -3,25 +3,23 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\Response as ResponseCode;
 
 class Role
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param Closure $next
-     * @param mixed ...$roles
-     * @return Response|RedirectResponse
-     */
-    public function handle(Request $request, Closure $next, ...$roles): Response|RedirectResponse
+    public function handle(Request $request, Closure $next, ...$roles)
     {
-        if (!in_array(auth()->user()->role, $roles)){
-            abort(ResponseCode::HTTP_FORBIDDEN);
+        $user = auth()->user();
+
+        // 🔥 cek login dulu
+        if (!$user) {
+            abort(ResponseCode::HTTP_FORBIDDEN, 'Unauthorized');
+        }
+
+        // 🔥 cek role
+        if (!in_array($user->role, $roles)) {
+            abort(ResponseCode::HTTP_FORBIDDEN, 'Akses ditolak');
         }
 
         return $next($request);

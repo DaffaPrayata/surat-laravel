@@ -17,13 +17,12 @@ use Illuminate\Support\Facades\App;
 class OutgoingLetterController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @return View
+     * Tampilan List Surat Keluar
      */
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', Letter::class);
+        
         return view('pages.transaction.outgoing.index', [
             'data' => Letter::outgoing()->render($request->search),
             'search' => $request->search,
@@ -31,10 +30,7 @@ class OutgoingLetterController extends Controller
     }
 
     /**
-     * Display a listing of the outgoing letter agenda.
-     *
-     * @param Request $request
-     * @return View
+     * Tampilan Halaman Agenda (Filter)
      */
     public function agenda(Request $request): View
     {
@@ -49,52 +45,66 @@ class OutgoingLetterController extends Controller
     }
 
     /**
-     * @param Request $request
-     * @return View
+     * Fungsi Print Laporan (Mingguan & Anti-Error)
      */
     public function print(Request $request): View
     {
+        $since = $request->since ?? now()->subDays(7)->format('Y-m-d');
+        $until = $request->until ?? now()->format('Y-m-d');
+        $filter = $request->filter ?? 'letter_date';
+
         $agenda = __('menu.agenda.menu');
         $letter = __('menu.agenda.outgoing_letter');
         $title = App::getLocale() == 'id' ? "$agenda $letter" : "$letter $agenda";
+
+        $configData = Config::pluck('value', 'code');
+
         return view('pages.transaction.outgoing.print', [
-            'data' => Letter::outgoing()->agenda($request->since, $request->until, $request->filter)->get(),
+            'data' => Letter::outgoing()->agenda($since, $until, $filter)->get(),
             'search' => $request->search,
-            'since' => $request->since,
-            'until' => $request->until,
-            'filter' => $request->filter,
-            'config' => Config::pluck('value','code')->toArray(),
+            'since' => \Carbon\Carbon::parse($since)->format('d/m/Y'),
+            'until' => \Carbon\Carbon::parse($until)->format('d/m/Y'),
+            'filter' => $filter,
+            'config' => [
+                'institution_name' => $configData['institution_name'] ?? 'SMK NEGERI 2 PADANG',
+                'institution_address' => $configData['institution_address'] ?? 'Jl. Jati No.5, Padang',
+            ],
             'title' => $title,
         ]);
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return View
+     * Form Tambah Surat
      */
     public function create(): View
     {
+        $this->authorize('create', Letter::class);
+
+        $maxAgenda = Letter::outgoing()->max('agenda_number');
+        $nextAgenda = ((int) $maxAgenda) + 1;
+
         return view('pages.transaction.outgoing.create', [
             'classifications' => Classification::all(),
+            'nextAgenda' => $nextAgenda,
         ]);
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param StoreLetterRequest $request
-     * @return RedirectResponse
+     * Simpan Data Surat
      */
     public function store(StoreLetterRequest $request): RedirectResponse
     {
+        $this->authorize('create', Letter::class);
+
         try {
             $user = auth()->user();
 
             if ($request->type != LetterType::OUTGOING->type()) throw new \Exception(__('menu.transaction.outgoing_letter'));
-            $newLetter = $request->validated();
+            
+            $newLetter = $request->all();
             $newLetter['user_id'] = $user->id;
             $letter = Letter::create($newLetter);
+
             if ($request->hasFile('attachments')) {
                 foreach ($request->attachments as $attachment) {
                     $extension = $attachment->getClientOriginalExtension();
@@ -119,26 +129,24 @@ class OutgoingLetterController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param Letter $outgoing
-     * @return View
+     * Detail Surat
      */
     public function show(Letter $outgoing): View
     {
+        $this->authorize('view', $outgoing);
+
         return view('pages.transaction.outgoing.show', [
             'data' => $outgoing->load(['classification', 'user', 'attachments']),
         ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param Letter $outgoing
-     * @return View
+     * Form Edit Surat
      */
     public function edit(Letter $outgoing): View
     {
+        $this->authorize('update', $outgoing);
+
         return view('pages.transaction.outgoing.edit', [
             'data' => $outgoing,
             'classifications' => Classification::all(),
@@ -146,14 +154,12 @@ class OutgoingLetterController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param UpdateLetterRequest $request
-     * @param Letter $outgoing
-     * @return RedirectResponse
+     * Update Data Surat
      */
     public function update(UpdateLetterRequest $request, Letter $outgoing): RedirectResponse
     {
+        $this->authorize('update', $outgoing);
+
         try {
             $outgoing->update($request->validated());
             if ($request->hasFile('attachments')) {
@@ -178,13 +184,11 @@ class OutgoingLetterController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param Letter $outgoing
-     * @return RedirectResponse
+     * Hapus Surat
      */
     public function destroy(Letter $outgoing): RedirectResponse
     {
+        $this->authorize('delete', $outgoing);
         try {
             $outgoing->delete();
             return redirect()

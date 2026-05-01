@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\Role;
 use App\Enums\Config as ConfigEnum;
+use App\Models\Config; // 🔥 FIX
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -15,83 +15,67 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-    'name',
-    'username',
-    'email',
-    'phone',
-    'password',
-    'role',
-    'is_active',
+        'name',
+        'username',
+        'email',
+        'phone',
+        'password',
+        'role',
+        'is_active',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_active' => 'boolean',
     ];
 
-    /**
-     * Get the user's profile picture
-     *
-     * @return Attribute
-     */
+    // 🔥 Avatar fallback
     public function profilePicture(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                if ($value) return $value;
-
-                $url = 'https://ui-avatars.com/api/?background=6D67E4&color=fff&name=';
-                return $url . urlencode($this->name);
-            },
+            get: fn ($value) =>
+                $value ?: 'https://ui-avatars.com/api/?background=6D67E4&color=fff&name=' . urlencode($this->name)
         );
     }
 
+    // 🔥 Scope Active
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
+    // 🔥 Scope Role
     public function scopeRole($query, Role $role)
     {
         return $query->where('role', $role->status());
     }
 
+    // 🔥 Search lebih fleksibel
     public function scopeSearch($query, $search)
     {
-        return $query->when($search, function($query, $find) {
-            return $query
-                ->where('name', 'LIKE', $find . '%')
-                ->orWhere('phone', $find)
-                ->orWhere('email', $find);
+        return $query->when($search, function ($query, $find) {
+            return $query->where(function ($q) use ($find) {
+                $q->where('name', 'LIKE', "%$find%")
+                  ->orWhere('email', 'LIKE', "%$find%")
+                  ->orWhere('phone', 'LIKE', "%$find%");
+            });
         });
     }
 
+    // 🔥 FIX UTAMA DI SINI
     public function scopeRender($query, $search)
     {
         return $query
             ->search($search)
-            ->role(Role::STAFF)
+            // ❌ HAPUS FILTER ROLE STAFF
+            // ->role(Role::STAFF)
+            ->latest()
             ->paginate(Config::getValueByCode(ConfigEnum::PAGE_SIZE))
             ->appends([
                 'search' => $search,
