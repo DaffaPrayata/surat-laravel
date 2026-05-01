@@ -1,0 +1,95 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+/*
+|--------------------------------------------------------------------------
+| AUTHENTICATION ROUTES (Guest - Belum Login)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['guest'])->group(function () {
+    // Halaman login
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    
+    // Proses login (POST)
+    Route::post('/login', [LoginController::class, 'login']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| AUTHENTICATED ROUTES (Sudah Login)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    
+    // Logout
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    
+    // Home/Dashboard
+    Route::get('/', [\App\Http\Controllers\PageController::class, 'index'])->name('home');
+    
+    // User Management (Admin only)
+    Route::resource('user', \App\Http\Controllers\UserController::class)
+        ->except(['show', 'edit', 'create'])
+        ->middleware(['role:admin']);
+    
+    // Profile
+    Route::get('profile', [\App\Http\Controllers\PageController::class, 'profile'])
+        ->name('profile.show');
+    Route::put('profile', [\App\Http\Controllers\PageController::class, 'profileUpdate'])
+        ->name('profile.update');
+    Route::put('profile/deactivate', [\App\Http\Controllers\PageController::class, 'deactivate'])
+        ->name('profile.deactivate')
+        ->middleware(['role:staff']);
+    
+    // Settings (Admin only)
+    Route::get('settings', [\App\Http\Controllers\PageController::class, 'settings'])
+        ->name('settings.show')
+        ->middleware(['role:admin']);
+    Route::put('settings', [\App\Http\Controllers\PageController::class, 'settingsUpdate'])
+        ->name('settings.update')
+        ->middleware(['role:admin']);
+    
+    // Attachment
+    Route::delete('attachment', [\App\Http\Controllers\PageController::class, 'removeAttachment'])
+        ->name('attachment.destroy');
+    
+    // Transaction (Surat Masuk/Keluar + Disposisi)
+    Route::prefix('transaction')->as('transaction.')->group(function () {
+        Route::resource('incoming', \App\Http\Controllers\IncomingLetterController::class);
+        Route::resource('outgoing', \App\Http\Controllers\OutgoingLetterController::class);
+        Route::resource('{letter}/disposition', \App\Http\Controllers\DispositionController::class)->except(['show']);
+    });
+    
+    // Agenda (Print & List)
+    Route::prefix('agenda')->as('agenda.')->group(function () {
+        Route::get('incoming', [\App\Http\Controllers\IncomingLetterController::class, 'agenda'])->name('incoming');
+        Route::get('incoming/print', [\App\Http\Controllers\IncomingLetterController::class, 'print'])->name('incoming.print');
+        Route::get('outgoing', [\App\Http\Controllers\OutgoingLetterController::class, 'agenda'])->name('outgoing');
+        Route::get('outgoing/print', [\App\Http\Controllers\OutgoingLetterController::class, 'print'])->name('outgoing.print');
+    });
+    
+    // Gallery Surat
+    Route::prefix('gallery')->as('gallery.')->group(function () {
+        Route::get('incoming', [\App\Http\Controllers\LetterGalleryController::class, 'incoming'])->name('incoming');
+        Route::get('outgoing', [\App\Http\Controllers\LetterGalleryController::class, 'outgoing'])->name('outgoing');
+    });
+    
+    // Reference Data (Admin only)
+    Route::prefix('reference')->as('reference.')->middleware(['role:admin'])->group(function () {
+        Route::resource('classification', \App\Http\Controllers\ClassificationController::class)->except(['show', 'create', 'edit']);
+        Route::resource('status', \App\Http\Controllers\LetterStatusController::class)->except(['show', 'create', 'edit']);
+    });
+});
