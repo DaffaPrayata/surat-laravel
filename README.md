@@ -1,4 +1,5 @@
-# 📨 E-Surat - Enterprise Letter Management System  
+# 📨 E-Surat - Enterprise Letter Management System
+
 ### *Modern Digital Correspondence Management for Schools & Institutions*
 
 <p align="center">
@@ -15,6 +16,7 @@
 ---
 
 ## 🚀 Overview
+
 **E-Surat v1** adalah platform manajemen korespondensi digital yang membantu instansi dalam mengelola surat masuk, surat keluar, dan disposisi secara terstruktur, cepat, dan efisien.
 
 ---
@@ -22,6 +24,7 @@
 ## 🖼️ Preview Aplikasi
 
 ### 💻 Dashboard (Desktop)
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/dc331e39-6459-4b75-9803-5d3208cecfd5" width="85%"/>
 </p>
@@ -31,6 +34,7 @@
 ---
 
 ### 📱 Tampilan Mobile (Responsive)
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/43c08837-ad66-451d-be3f-d1f326e67188" width="30%"/>
   <img src="https://github.com/user-attachments/assets/65549459-ae18-4ae6-8c4a-094aa302464d" width="30%"/>
@@ -48,12 +52,13 @@
 ---
 
 ### 🧾 Halaman & Fitur Sistem
+
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/c716c8e5-0b02-4859-a653-2725b92b6160" width="30%"/>
-  <img src="https://github.com/user-attachments/assets/def0fbad-2511-4a6e-9f96-4fd9f33f592b" width="30%"/>
+  <img src="https://github.com/user-attachments/assets/c716c8e5-0b02-4859-a653-2725b92b6160" width="45%"/>
+  <img src="https://github.com/user-attachments/assets/def0fbad-2511-4a6e-9f96-4fd9f33f592b" width="45%"/>
 </p>
 
-<p align="center"><i>Manajemen surat & alur disposisi</i></p>
+<p align="center"><i>Manajemen surat masuk & keluar</i></p>
 
 ---
 
@@ -75,7 +80,7 @@
 - Tracking alur surat  
 
 ### 🔐 Authentication System
-- Multi-role: Admin & Staff  
+- Multi-role: Admin & Staff Dan Siswa  
 - Proteksi akses data  
 - Session management  
 
@@ -98,27 +103,23 @@
 
 ## ⚡ Instalasi
 
-1. **Clone & Install**: `git clone https://github.com/daffaprayata/surat-laravel.git && composer install`
-2. **Environment**: `cp .env.example .env && php artisan key:generate`
-3. **Database**: `php artisan migrate --seed`
-4. **Storage**: `php artisan storage:link`
-5. **Run**: `php artisan serve`
+```bash
+# 1. Clone repository
+git clone https://github.com/daffaprayata/surat-laravel.git
+cd surat-laravel
 
-## 🔑 Default Credentials
-| Role | Email | Password |
-| :--- | :--- | :--- |
-| **Admin** | `admin@admin.com` | `admin` |
+# 2. Install dependencies
+composer install
 
+# 3. Setup environment
+cp .env.example .env
+php artisan key:generate
 
-## 👨‍💻 Developer
+# 4. Setup database (edit .env terlebih dahulu)
+php artisan migrate --seed
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/15946d2c-c360-4bf4-a005-ddbc277ae4b9"
-       width="150"
-       style="border-radius: 50%; object-fit: cover;"/>
-</p>
+# 5. Link storage untuk upload file
+php artisan storage:link
 
-<p align="center">
-  <b>Daffa Prayata</b><br>
-  Web Developer • Laravel Enthusiast
-</p>
+# 6. Jalankan server
+php artisan serve
