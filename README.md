@@ -44,7 +44,6 @@
 <p align="center">
   <img src="https://github.com/user-attachments/assets/edbb228f-b0ee-42f0-9313-32640054de69" width="30%"/>
   <img src="https://github.com/user-attachments/assets/01fc27bc-4777-49f4-8d4a-8d744d0a5653" width="30%"/>
-  <img src="https://github.com/user-attachments/assets/b6b407f8-5276-451b-97ce-183ac3aff3d4" width="30%"/>
 </p>
 
 <p align="center"><i>Fully responsive UI di berbagai ukuran layar</i></p>
