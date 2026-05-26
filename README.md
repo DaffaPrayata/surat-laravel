@@ -196,5 +196,9 @@ Project ini dibuat untuk kebutuhan pembelajaran, pengembangan, dan implementasi 
 ---
 
 <p align="center">
-  Made with ❤️ by <b>Daffa Prayata</b>
+  <b>Daffa Prayata</b><br>
+  Web Developer • Laravel Enthusiast <br><br>
+  
+  <a href="https://github.com/DaffaPrayata">GitHub</a> • 
+  <a href="#">Portfolio</a>
 </p>
