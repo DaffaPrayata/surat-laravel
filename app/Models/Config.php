@@ -23,6 +23,6 @@ class Config extends Model
 
     public function scopeCode($query, \App\Enums\Config $code)
     {
-        return $query->where('code', $code->value());
+        return $query->where('code', $code->value);
     }
 }

@@ -14,8 +14,7 @@ class UpdateUserRequest extends FormRequest
      * @return bool
      */
     public function authorize(): bool
-    {
-        return auth()->user()->role == Role::ADMIN->status() || $this->id == auth()->user()->id;
+    {   return true;
     }
 
     /**

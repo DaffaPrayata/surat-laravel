@@ -2,18 +2,18 @@
 
 namespace App\Enums;
 
-// Tambahin ': string' biar jadi Backed Enum
+// Hapus 'protected', langsung 'enum' saja
 enum Role: string
 {
     case ADMIN = 'admin';
     case STAFF = 'staff';
-    case SISWA = 'siswa'; // Tambahin ini
+    case SISWA = 'siswa';
 
     public function label(): string
     {
         return match ($this) {
             self::ADMIN => 'Administrator',
-            self::STAFF => 'Staff Tata Usaha',
+            self::STAFF => 'Guru',
             self::SISWA => 'Siswa',
         };
     }

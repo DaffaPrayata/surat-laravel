@@ -7,7 +7,7 @@
                 <img src="{{ asset('logo.png') }}" alt="Logo" width="25" class="brand-logo-img">
             </span>
             <div class="brand-text-wrapper ms-2">
-                <span class="app-brand-text demo fw-bolder">Asip</span>
+                <span class="app-brand-text demo fw-bolder"></span>
                 <small class="school-label">SMKN 2 PADANG</small>
             </div>
         </a>

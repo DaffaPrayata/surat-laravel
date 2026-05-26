@@ -53,7 +53,7 @@ class User extends Authenticatable
     // 🔥 Scope Role
     public function scopeRole($query, Role $role)
     {
-        return $query->where('role', $role->status());
+        return $query->where('role', $role->value);
     }
 
     // 🔥 Search lebih fleksibel
