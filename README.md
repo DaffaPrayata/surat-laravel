@@ -4,6 +4,12 @@
 
 **Modern Digital Correspondence Management for Educational Institutions**
 
+<img width="720" height="1600" alt="WhatsApp Image 2026-07-28 at 15 39 46" src="https://github.com/user-attachments/assets/b58e2d1e-5d5b-43a9-bc9a-a77b16372efb" />
+<img width="720" height="1600" alt="WhatsApp Image 2026-07-28 at 15 38 49" src="https://github.com/user-attachments/assets/3b462ea9-decb-419c-9921-1a0d203e9b56" />
+<img width="1600" height="900" alt="WhatsApp Image 2026-07-28 at 15 38 49 (1)" src="https://github.com/user-attachments/assets/73195374-bda8-4e61-8a90-a636ce89cbb6" />
+
+
+
 <p align="center">
   <b>Developed by Daffa Prayata</b>
 </p>
